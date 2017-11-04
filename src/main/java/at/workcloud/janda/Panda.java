@@ -24,7 +24,7 @@ public class Panda {
     private Handle handle;
     
     public Panda( String handle ) throws Exception {
-        if ( handle != null && handle.equals( "WIFI") ) {
+        if ( handle != null && handle.equals( "WIFI" ) ) {
             throw new UnsupportedOperationException( "Not implemented yet" );
         } else {
             this.handle = new USBHandle();
@@ -52,6 +52,10 @@ public class Panda {
     public void setSafetyMode( int mode ) throws Exception {
         this.handle.controlWrite( REQUEST_OUT, 0xdc, ( short ) mode, ( short ) 0 );
         System.out.println( "Safety mode has been set to " + mode );
+    }
+    
+    public void canClear( short bus ) throws Exception {
+        this.handle.controlWrite( REQUEST_OUT, 0xf1, bus, ( short ) 0 );
     }
     
     public void close() {
