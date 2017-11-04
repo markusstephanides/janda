@@ -43,11 +43,11 @@ public class ManagedDeviceHandle implements Closeable {
         if ( openResult != LibUsb.SUCCESS ) throw new LibUsbException( "Unable to open USB device", openResult );
         
         // Check if kernel driver must be detached
-        boolean detach = LibUsb.hasCapability( LibUsb.CAP_SUPPORTS_DETACH_KERNEL_DRIVER )
+        this.detach = LibUsb.hasCapability( LibUsb.CAP_SUPPORTS_DETACH_KERNEL_DRIVER )
                 && LibUsb.kernelDriverActive( this.handle, 0 ) == 1;
         
         // Detach the kernel driver
-        if ( detach ) {
+        if ( this.detach ) {
             int result = LibUsb.detachKernelDriver( this.handle, 0 );
             if ( result != LibUsb.SUCCESS ) throw new LibUsbException( "Unable to detach kernel driver", result );
         }
