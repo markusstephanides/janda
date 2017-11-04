@@ -2,6 +2,7 @@ package at.workcloud.janda.handle;
 
 import org.usb4java.*;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -19,21 +20,29 @@ public class USBHandle implements Handle {
 
     
     @Override
-    public void controlWrite(byte requestType, int request, short value, short index) throws Exception {
+    public void controlWrite(byte requestType, int request, short value, short index, long timeout) throws Exception {
         try ( ManagedDeviceHandle handle = new ManagedDeviceHandle( this.device ) ) {
             requestType = ( byte ) ( ( requestType & ~ LibUsb.ENDPOINT_DIR_MASK ) );
-            LibUsb.controlTransfer( handle.getHandle(), requestType, ( byte ) 0xdc, value, ( short ) 0, ByteBuffer.allocate( 0 ), 0 );
+            LibUsb.controlTransfer( handle.getHandle(), requestType, ( byte ) 0xdc, value, ( short ) 0, ByteBuffer.allocate( 0 ), timeout );
         }
     }
     
     @Override
-    public byte[] bulkRead( byte interface_, int length ) throws Exception {
+    public byte[] bulkRead( byte interface_, int length, long timeout ) throws Exception {
         try ( ManagedDeviceHandle handle = new ManagedDeviceHandle( this.device ) ) {
             byte endpoint = ( byte ) ( ( interface_ & ~ LibUsb.ENDPOINT_DIR_MASK ) | LibUsb.ENDPOINT_IN );
         
             ByteBuffer byteBuffer = ByteBuffer.allocate( length );
-            LibUsb.bulkTransfer( handle.getHandle(), endpoint, byteBuffer, null, 0 );
+            LibUsb.bulkTransfer( handle.getHandle(), endpoint, byteBuffer, null, timeout );
             return byteBuffer.array();
+        }
+    }
+    
+    @Override
+    public void bulkWrite( byte endpoint, ByteBuffer data, long timeout ) throws Exception {
+        try ( ManagedDeviceHandle handle = new ManagedDeviceHandle( this.device ) ) {
+            endpoint = ( byte ) ( ( endpoint & ~ LibUsb.ENDPOINT_DIR_MASK ) | LibUsb.ENDPOINT_OUT );
+            LibUsb.bulkTransfer( handle.getHandle(), endpoint, data, null, timeout );
         }
     }
     

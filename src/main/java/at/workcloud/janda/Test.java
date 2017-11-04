@@ -12,7 +12,7 @@ public class Test {
         CANMessage[] msgs = panda.canRecv();
         System.out.println("Received " + msgs.length);
         for ( CANMessage msg : msgs ) {
-            System.out.println(msg.getAddress() + ", " + msg.getB2() + ", " + msg.getB3().length + " + bytes, " + msg.getB4());
+            System.out.println(msg.getAddress() + ", " + msg.getB2() + ", " + msg.getData().length + " + bytes, " + msg.getBus());
         }
         
         panda.close();

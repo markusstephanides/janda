@@ -8,14 +8,14 @@ public class CANMessage {
     
     private long address;
     private long b2;
-    private byte[] b3;
-    private long b4;
+    private byte[] data;
+    private long bus;
     
-    public CANMessage( long address, long b2, byte[] b3, long b4 ) {
+    public CANMessage( long address, long b2, byte[] data, long bus ) {
         this.address = address;
         this.b2 = b2;
-        this.b3 = b3;
-        this.b4 = b4;
+        this.data = data;
+        this.bus = bus;
     }
     
     public long getAddress() {
@@ -26,11 +26,11 @@ public class CANMessage {
         return b2;
     }
     
-    public byte[] getB3() {
-        return b3;
+    public byte[] getData() {
+        return data;
     }
     
-    public long getB4() {
-        return b4;
+    public long getBus() {
+        return bus;
     }
 }
