@@ -44,17 +44,23 @@ public class Panda {
         this( null );
     }
     
-    public CANMessage[] canRecv() throws Exception {
+    public CANMessage[] canRecv() {
         while ( true ) {
             try {
                 byte[] data = this.handle.bulkRead( ( byte ) 0x1, 0x10 * 0xFF, 0 );
                 System.out.println( "Can recv read " + data.length );
                 return Utils.parseCanBuffer( data );
             } catch ( Exception a ) {
+                a.printStackTrace();
                 System.out.println( "BAD CAN RECV, RETRYING!" );
+               // return null;
             }
-            
-            Thread.sleep( 10 );
+
+            try {
+                Thread.sleep( 10 );
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
     

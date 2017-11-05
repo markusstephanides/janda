@@ -17,7 +17,7 @@ public class Utils {
         
         for(int i = 0; i < dat.length; i+=0x10) {
             byte[] ddat = new byte[0x10];
-            System.arraycopy( ddat, i, ddat, 0, 0x10);
+            System.arraycopy( dat, i, ddat, 0, 0x10);
             long f1 = ByteBuffer.wrap( ddat, 0, 4 ).getInt();
             long f2 = ByteBuffer.wrap( ddat, 4, 4 ).getInt();
             byte extended = 4;

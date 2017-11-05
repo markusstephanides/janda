@@ -8,11 +8,11 @@ public class Test {
     
     public static void main(String[] args) throws Exception {
         Panda panda = new Panda( );
-        panda.setSafetyMode( Panda.SAFETY_ELM327 );
+       // panda.setSafetyMode( Panda.SAFETY_ALLOUTPUT );
         CANMessage[] msgs = panda.canRecv();
         System.out.println("Received " + msgs.length);
         for ( CANMessage msg : msgs ) {
-            System.out.println(msg.getAddress() + ", " + msg.getB2() + ", " + msg.getData().length + " + bytes, " + msg.getBus());
+            System.out.println(msg.getAddress() + ", " + msg.getB2() + ", " + msg.getData().length + " bytes, " + msg.getBus());
         }
         
         panda.close();

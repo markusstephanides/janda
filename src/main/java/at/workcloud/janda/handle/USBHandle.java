@@ -1,10 +1,13 @@
 package at.workcloud.janda.handle;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.usb4java.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 
 /**
  * @author MaSte
@@ -24,7 +27,7 @@ public class USBHandle implements Handle {
     public void controlWrite(byte requestType, int request, short value, short index, long timeout) throws Exception {
         try ( ManagedDeviceHandle handle = new ManagedDeviceHandle( this.device ) ) {
             requestType = ( byte ) ( ( requestType & ~ LibUsb.ENDPOINT_DIR_MASK ) );
-            LibUsb.controlTransfer( handle.getHandle(), requestType, ( byte ) 0xdc, value, ( short ) 0, ByteBuffer.allocate( 0 ), timeout );
+            LibUsb.controlTransfer( handle.getHandle(), requestType, ( byte ) 0xdc, value, ( short ) 0, ByteBuffer.allocateDirect( 0 ), timeout );
         }
     }
     
@@ -32,11 +35,19 @@ public class USBHandle implements Handle {
     public byte[] bulkRead( byte interface_, int length, long timeout ) throws Exception {
         try ( ManagedDeviceHandle handle = new ManagedDeviceHandle( this.device ) ) {
             byte endpoint = ( byte ) ( ( interface_ & ~ LibUsb.ENDPOINT_DIR_MASK ) | LibUsb.ENDPOINT_IN );
-        
-            ByteBuffer byteBuffer = ByteBuffer.allocate( length );
-            byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-            LibUsb.bulkTransfer( handle.getHandle(), endpoint, byteBuffer, null, timeout );
-            return byteBuffer.array();
+
+            ByteBuffer buffer = BufferUtils.allocateByteBuffer(length).order(ByteOrder.LITTLE_ENDIAN);
+            IntBuffer transferred = BufferUtils.allocateIntBuffer();
+            System.out.println("Sending " + length + " bytes");
+            int res = LibUsb.bulkTransfer( handle.getHandle(), endpoint, buffer, transferred, timeout );
+            System.out.println("res " + res);
+            if(res != LibUsb.SUCCESS) {
+                throw new Exception("Error code: " + res);
+            }
+            System.out.println(transferred.get() + " bytes read from device");
+           //
+           // System.out.println(ArrayUtils.toString(data));
+            return new byte[length];
         }
     }
     
@@ -78,7 +89,7 @@ public class USBHandle implements Handle {
                 DeviceDescriptor descriptor = new DeviceDescriptor();
                 result = LibUsb.getDeviceDescriptor( device, descriptor );
                 if ( result != LibUsb.SUCCESS ) throw new LibUsbException( "Unable to read device descriptor", result );
-                if ( descriptor.idVendor() == 0xbbaa && ( descriptor.idProduct() == 0xddcc || descriptor.idProduct() == 0xddee ) )
+                if ( descriptor.idVendor() == (short)0xbbaa && ( descriptor.idProduct() == (short)0xddcc || descriptor.idProduct() == (short)0xddee ) )
                     return device;
             }
         } finally {

@@ -18,7 +18,6 @@ public class ManagedDeviceHandle implements Closeable {
     private boolean detach;
     
     public ManagedDeviceHandle( Device device ) {
-        this.handle = new DeviceHandle();
         this.open( device );
     }
     
@@ -29,8 +28,13 @@ public class ManagedDeviceHandle implements Closeable {
             if ( result != LibUsb.SUCCESS )
                 throw new LibUsbException( "Unable to re-attach kernel driver", result );
         }
-        
+
+        int result = LibUsb.releaseInterface(this.handle, 0);
+        if (result != LibUsb.SUCCESS) throw new LibUsbException("Unable to release interface", result);
+
         LibUsb.close( this.handle );
+
+        System.out.println("closed");
         
     }
     
@@ -39,9 +43,14 @@ public class ManagedDeviceHandle implements Closeable {
     }
     
     private void open( Device device ) {
+        this.handle = new DeviceHandle();
         int openResult = LibUsb.open( device, this.handle );
         if ( openResult != LibUsb.SUCCESS ) throw new LibUsbException( "Unable to open USB device", openResult );
-        
+
+        int claimResult = LibUsb.claimInterface(this.handle, 0);
+        if (claimResult != LibUsb.SUCCESS) throw new LibUsbException("Unable to claim interface", claimResult);
+
+
         // Check if kernel driver must be detached
         this.detach = LibUsb.hasCapability( LibUsb.CAP_SUPPORTS_DETACH_KERNEL_DRIVER )
                 && LibUsb.kernelDriverActive( this.handle, 0 ) == 1;
@@ -51,6 +60,7 @@ public class ManagedDeviceHandle implements Closeable {
             int result = LibUsb.detachKernelDriver( this.handle, 0 );
             if ( result != LibUsb.SUCCESS ) throw new LibUsbException( "Unable to detach kernel driver", result );
         }
+        System.out.println("opened");
     }
     
 }
