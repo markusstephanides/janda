@@ -6,6 +6,7 @@ import at.workcloud.janda.util.Utils;
 import org.usb4java.LibUsb;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * @author MaSte
@@ -57,16 +58,9 @@ public class Panda {
         }
     }
     
-    public void setCanForwarding( short fromBus, short toBus ) throws Exception {
-        this.handle.controlWrite( REQUEST_OUT, 0xdd, fromBus, toBus, 0 );
-    }
-    
-    public void setCanSpeed( short bus, short speed ) throws Exception {
-        this.handle.controlWrite( REQUEST_OUT, 0xde, bus, ( short ) ( speed * 10 ), 0 );
-    }
-    
     public void canSendMany( CANMessage[] messages ) throws Exception {
-        ByteBuffer byteBuffer = ByteBuffer.allocate( messages.length << 1 );
+        ByteBuffer byteBuffer = ByteBuffer.allocate( messages.length * 0x10 );
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         byte transmit = 1;
         byte extended = 4;
         
@@ -87,20 +81,23 @@ public class Panda {
             byteBuffer.putInt( Math.toIntExact( message.getData().length | ( message.getBus() << 4 ) ) );
             byteBuffer.put( message.getData() );
             
-            for ( int i = 0; i < ( 0x10 - ( 0x4 << 1 ) ) - message.getData().length; i++ ) {
+            for ( int i = 0; i < (0x10 - (0x4 << 1)) - message.getData().length; i++ ) {
                 byteBuffer.put( ( byte ) 0 );
             }
         }
         
-        while ( true ) {
+        while(true) {
             try {
-                if ( this.handle instanceof USBHandle ) {
+                if(this.handle instanceof USBHandle) {
                     this.handle.bulkWrite( ( byte ) 3, byteBuffer, 0 );
-                } else {
+                    System.out.println("Wrote " + byteBuffer.array().length + " bytes");
+                }
+                else {
                     throw new UnsupportedOperationException( "WIFI write not supported yet!" );
                 }
-            } catch ( Exception e ) {
-                System.out.println( "BAD CAN SEND MANY, RETRYING" );
+            }
+            catch ( Exception e ) {
+                System.out.println("BAD CAN SEND MANY, RETRYING");
             }
         }
     }

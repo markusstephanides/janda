@@ -4,6 +4,7 @@ import org.usb4java.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * @author MaSte
@@ -33,6 +34,7 @@ public class USBHandle implements Handle {
             byte endpoint = ( byte ) ( ( interface_ & ~ LibUsb.ENDPOINT_DIR_MASK ) | LibUsb.ENDPOINT_IN );
         
             ByteBuffer byteBuffer = ByteBuffer.allocate( length );
+            byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
             LibUsb.bulkTransfer( handle.getHandle(), endpoint, byteBuffer, null, timeout );
             return byteBuffer.array();
         }
