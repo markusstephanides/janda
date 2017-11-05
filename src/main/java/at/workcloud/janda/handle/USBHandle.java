@@ -55,7 +55,7 @@ public class USBHandle implements Handle {
         int initResult = LibUsb.init( null );
         if ( initResult != LibUsb.SUCCESS ) throw new LibUsbException( "Unable to initialize libusb.", initResult );
         
-        this.device = findPanda();
+        this.device = this.findPanda();
         
         if ( this.device == null ) {
             throw new Exception( "Couldn't find a panda!" );
